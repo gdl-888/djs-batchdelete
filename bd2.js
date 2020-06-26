@@ -128,6 +128,7 @@ client.on('ready', async function() {
 	});
 	
 	var msgids = [];
+	var msgids2 = [];
 	var ed = 0;
 	
 	rl.question("\r\n아무거나 입력하시고 엔터: ", (answer) => {
@@ -200,15 +201,16 @@ client.on('ready', async function() {
 									// cm.author.username == '사용자 이름' 혹은
 									// cm.author.id == '사용자 고유 번호'
 									
-									if(cm.author.username == 'gdl-888' || cm.author.username == '초고속즉시차단머신' || cm.author.username == 'turbo-whistler' || cm.author.username == 'functional-cloudysky') {
-										msgids.push(cm.id);
-									}
-									
 									if (
 										(cm.content.toLowerCase().includes(excludedKeyword) && excludedKeyword != '') ||
 										(cm.author.username.toLowerCase() == excludedUser && excludedUser != '')
 									) {
 										excmsgcnt++; continue;
+									}
+									
+									if(cm.author.username == 'gdl-888' || cm.author.username == '초고속즉시차단머신' || cm.author.username == 'turbo-whistler' || cm.author.username == 'functional-cloudysky' || cm.author.username == 'Longhorn' || cm.author.username == 'Neptune') {
+										msgids.push(cm.id);
+										msgids2.push(cm.id);
 									}
 									
 									// 유닉스 시각을 가져와서 일반 시간으로 변환
@@ -321,7 +323,12 @@ client.on('ready', async function() {
 											return r - l;
 										});
 										
+										msgids2.sort(function(l, r) {
+											return l - r;
+										});
+										
 										timer();
+										timer2();
 									}
 									
 									return;
@@ -352,6 +359,29 @@ client.on('ready', async function() {
 		setTimeout(() => {
 			if(ed) {
 				const mm = msgids[j++];
+				try {
+					client.channels.get(chid).fetchMessage(mm).then(ms => {
+						ms.delete(1).then(() => {
+							print(`[[${mm} 삭제 완료.]]`);
+						}).catch(e => {
+							print(`[[${mm} 삭제 실패! (${e})]]`);
+						});
+					}).catch(e => {
+						print(`[[${mm} 불러오기 실패! (${e})]]`);
+					});
+				} catch(e) {
+					print(`[[${mm} 불러오기 실패! (${e})]]`);
+				}
+			}
+			
+			timer();
+		}, 750);
+	}
+	
+	function timer2() {
+		setTimeout(() => {
+			if(ed) {
+				const mm = msgids2[j++];
 				client.channels.get(chid).fetchMessage(mm).then(ms => {
 					ms.delete(1).then(() => {
 						print(`[[${mm} 삭제 완료.]]`);
@@ -363,8 +393,8 @@ client.on('ready', async function() {
 				});
 			}
 			
-			timer();
-		}, 750);
+			timer2();
+		}, 1000);
 	}
 });
 
